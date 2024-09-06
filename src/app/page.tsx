@@ -1,8 +1,8 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useMemo } from 'react'
 import Image from 'next/image'
-import { ArrowUp, ArrowDown, Minus, ChevronRight, ChevronLeft } from 'lucide-react'
+import { ArrowUp, ArrowDown, Minus, ChevronRight, ChevronLeft, Trophy, Search } from 'lucide-react'
 import mashreqLogo from './mashreq-logo.png'
 import { Cairo } from 'next/font/google'
 
@@ -55,16 +55,25 @@ const ChangeIcon = ({ change }: { change: 'up' | 'down' | 'same' }) => {
 
 export default function Home() {
   const [currentPage, setCurrentPage] = useState(1)
+  const [searchTerm, setSearchTerm] = useState('')
   const playersPerPage = 10
-  const totalPages = Math.ceil(mockData.length / playersPerPage)
 
-  const sortedData = [...mockData].sort((a, b) => {
-    if (b.accuracy !== a.accuracy) return b.accuracy - a.accuracy
-    if (a.speed !== b.speed) return a.speed - b.speed
-    return b.engagement - a.engagement
-  })
+  const filteredAndSortedData = useMemo(() => {
+    return [...mockData]
+      .filter(player => 
+        player.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        player.department.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+      .sort((a, b) => {
+        if (b.accuracy !== a.accuracy) return b.accuracy - a.accuracy
+        if (a.speed !== b.speed) return a.speed - b.speed
+        return b.engagement - a.engagement
+      })
+  }, [searchTerm])
 
-  const currentPlayers = sortedData.slice(
+  const totalPages = Math.ceil(filteredAndSortedData.length / playersPerPage)
+
+  const currentPlayers = filteredAndSortedData.slice(
     (currentPage - 1) * playersPerPage,
     currentPage * playersPerPage
   )
@@ -81,15 +90,39 @@ export default function Home() {
           className="object-contain"
         />
       </div>
+      <div className="mb-4 relative">
+        <input
+          type="text"
+          placeholder="Search by name or department"
+          value={searchTerm}
+          onChange={(e) => {
+            setSearchTerm(e.target.value)
+            setCurrentPage(1)  // Reset to first page on search
+          }}
+          className="w-full bg-gray-700 text-white px-4 py-2 pr-10 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+        <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+      </div>
       <div className="flex-grow bg-gray-800 rounded-lg overflow-hidden flex flex-col">
         <div className="flex-grow overflow-auto">
           {currentPlayers.map((player, index) => {
-            const actualIndex = (currentPage - 1) * playersPerPage + index
+            const actualIndex = filteredAndSortedData.indexOf(player)
+            const isTopThree = actualIndex < 3
             return (
               <div key={index} className={`flex items-center p-4 ${index % 2 === 0 ? 'bg-gray-750' : 'bg-gray-800'} hover:bg-gray-700 transition-colors`}>
-                <div className="flex items-center w-12">
-                  <ChangeIcon change={player.change} />
-                  <span className={`ml-2 font-bold ${actualIndex < 3 ? 'text-yellow-400' : 'text-gray-400'}`}>{actualIndex + 1}</span>
+                <div className="flex items-center w-16">
+                  {isTopThree ? (
+                    <Trophy className={`w-6 h-6 ${
+                      actualIndex === 0 ? 'text-yellow-400' :
+                      actualIndex === 1 ? 'text-gray-400' :
+                      'text-amber-600'
+                    }`} />
+                  ) : (
+                    <ChangeIcon change={player.change} />
+                  )}
+                  <span className={`ml-2 font-bold ${isTopThree ? 'text-white' : 'text-gray-400'}`}>
+                    {actualIndex + 1}
+                  </span>
                 </div>
                 <div className="flex-grow">
                   <div className="font-bold">{player.name}</div>
@@ -107,11 +140,16 @@ export default function Home() {
                   </div>
                   <div className="w-20 text-center">
                     <div className="font-bold">{player.engagement}</div>
-                    <div className="text-gray-400">Engage</div>
+                    <div className="text-gray-400">Engagement</div>
                   </div>
                 </div>
                 <div className="w-20 text-center ml-8">
-                  <div className={`font-bold text-lg ${actualIndex < 3 ? 'text-yellow-400' : 'text-white'}`}>
+                  <div className={`font-bold text-lg ${
+                    actualIndex === 0 ? 'text-yellow-400' :
+                    actualIndex === 1 ? 'text-gray-400' :
+                    actualIndex === 2 ? 'text-amber-600' :
+                    'text-white'
+                  }`}>
                     {(player.accuracy + player.speed / 2 + player.engagement * 10).toFixed(0)}
                   </div>
                   <div className="text-gray-400">Score</div>
