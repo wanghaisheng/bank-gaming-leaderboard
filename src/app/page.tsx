@@ -1,8 +1,8 @@
 'use client'
 
-import React from 'react'
+import React, { useState } from 'react'
 import Image from 'next/image'
-import { ArrowUp, ArrowDown, Minus, ChevronRight } from 'lucide-react'
+import { ArrowUp, ArrowDown, Minus, ChevronRight, ChevronLeft } from 'lucide-react'
 import mashreqLogo from './mashreq-logo.png'
 
 type Player = {
@@ -26,6 +26,17 @@ const mockData: Player[] = [
   { name: "Vikram Singh", department: "IT Operations", speed: 65, accuracy: 93, engagement: 4, change: 'down', completionDate: "November 7, 2024" },
   { name: "Laila El-Masry", department: "Customer Service", speed: 90, accuracy: 88, engagement: 3, change: 'up', completionDate: "October 25, 2024" },
   { name: "Mohammed Al-Hashimi", department: "Islamic Banking", speed: 78, accuracy: 94, engagement: 4, change: 'down', completionDate: "November 19, 2024" },
+  // New entries for the second page
+  { name: "Sara Al-Mansoori", department: "Human Resources", speed: 73, accuracy: 91, engagement: 4, change: 'up', completionDate: "November 12, 2024" },
+  { name: "Ahmed El-Sawy", department: "Marketing", speed: 82, accuracy: 89, engagement: 3, change: 'down', completionDate: "October 28, 2024" },
+  { name: "Nadia Khalil", department: "Legal", speed: 69, accuracy: 97, engagement: 5, change: 'same', completionDate: "December 1, 2024" },
+  { name: "Tariq Mahmood", department: "Operations", speed: 77, accuracy: 93, engagement: 4, change: 'up', completionDate: "November 9, 2024" },
+  { name: "Leila Hakim", department: "Corporate Strategy", speed: 88, accuracy: 86, engagement: 3, change: 'down', completionDate: "October 31, 2024" },
+  { name: "Hassan Abdel-Rahman", department: "Product Development", speed: 79, accuracy: 95, engagement: 5, change: 'up', completionDate: "November 25, 2024" },
+  { name: "Rania El-Khoury", department: "Customer Experience", speed: 84, accuracy: 92, engagement: 4, change: 'same', completionDate: "December 3, 2024" },
+  { name: "Karim Nasser", department: "Digital Banking", speed: 76, accuracy: 94, engagement: 4, change: 'down', completionDate: "November 17, 2024" },
+  { name: "Yasmin Fawzi", department: "Financial Planning", speed: 71, accuracy: 98, engagement: 5, change: 'up', completionDate: "December 7, 2024" },
+  { name: "Ali Al-Farsi", department: "International Relations", speed: 83, accuracy: 91, engagement: 3, change: 'down', completionDate: "November 2, 2024" },
 ]
 
 const ChangeIcon = ({ change }: { change: 'up' | 'down' | 'same' }) => {
@@ -40,15 +51,25 @@ const ChangeIcon = ({ change }: { change: 'up' | 'down' | 'same' }) => {
 }
 
 export default function Home() {
+  const [currentPage, setCurrentPage] = useState(1)
+  const playersPerPage = 10
+  const totalPages = Math.ceil(mockData.length / playersPerPage)
+
   const sortedData = [...mockData].sort((a, b) => {
     if (b.accuracy !== a.accuracy) return b.accuracy - a.accuracy
     if (a.speed !== b.speed) return a.speed - b.speed
     return b.engagement - a.engagement
   })
 
+  const currentPlayers = sortedData.slice(
+    (currentPage - 1) * playersPerPage,
+    currentPage * playersPerPage
+  )
+
   return (
-    <div className="min-h-screen bg-gray-900 text-white px-44 pt-10 relative">
-      <div className="absolute top-4 right-4">
+    <div className="h-screen bg-gray-900 text-white p-8 flex flex-col">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold">Mashreq Culture Leaderboard</h1>
         <Image
           src={mashreqLogo}
           alt="Mashreq Bank Logo"
@@ -57,45 +78,65 @@ export default function Home() {
           className="object-contain"
         />
       </div>
-      <h1 className="text-3xl font-bold mb-6 text-center">Mashreq Culture Leaderboard</h1>
-      <div className="bg-gray-800 rounded-lg overflow-hidden">
-        {sortedData.map((player, index) => (
-          <div key={index} className={`flex items-center p-4 ${index % 2 === 0 ? 'bg-gray-750' : 'bg-gray-800'} hover:bg-gray-700 transition-colors`}>
-            <div className="flex items-center w-12">
-              <ChangeIcon change={player.change} />
-              <span className={`ml-2 font-bold ${index < 3 ? 'text-yellow-400' : 'text-gray-400'}`}>{index + 1}</span>
-            </div>
-            <div className="w-10 h-10 bg-gray-600 rounded-full flex items-center justify-center mr-4">
-              {player.name.charAt(0)}
-            </div>
-            <div className="flex-grow">
-              <div className="font-bold">{player.name}</div>
-              <div className="text-sm text-gray-400">{player.department}</div>
-              <div className="text-xs text-gray-500">{player.completionDate}</div>
-            </div>
-            <div className="flex space-x-8 text-sm">
-              <div className="w-20 text-center">
-                <div className="font-bold">{player.speed}</div>
-                <div className="text-gray-400">Speed</div>
+      <div className="flex-grow bg-gray-800 rounded-lg overflow-hidden flex flex-col">
+        <div className="flex-grow overflow-auto">
+          {currentPlayers.map((player, index) => {
+            const actualIndex = (currentPage - 1) * playersPerPage + index
+            return (
+              <div key={index} className={`flex items-center p-4 ${index % 2 === 0 ? 'bg-gray-750' : 'bg-gray-800'} hover:bg-gray-700 transition-colors`}>
+                <div className="flex items-center w-12">
+                  <ChangeIcon change={player.change} />
+                  <span className={`ml-2 font-bold ${actualIndex < 3 ? 'text-yellow-400' : 'text-gray-400'}`}>{actualIndex + 1}</span>
+                </div>
+                <div className="flex-grow">
+                  <div className="font-bold">{player.name}</div>
+                  <div className="text-sm text-gray-400">{player.department}</div>
+                  <div className="text-xs text-gray-500">{player.completionDate}</div>
+                </div>
+                <div className="flex space-x-8 text-sm">
+                  <div className="w-20 text-center">
+                    <div className="font-bold">{player.speed}</div>
+                    <div className="text-gray-400">Speed</div>
+                  </div>
+                  <div className="w-20 text-center">
+                    <div className="font-bold">{player.accuracy}%</div>
+                    <div className="text-gray-400">Accuracy</div>
+                  </div>
+                  <div className="w-20 text-center">
+                    <div className="font-bold">{player.engagement}</div>
+                    <div className="text-gray-400">Engage</div>
+                  </div>
+                </div>
+                <div className="w-20 text-center ml-8">
+                  <div className={`font-bold text-lg ${actualIndex < 3 ? 'text-yellow-400' : 'text-white'}`}>
+                    {(player.accuracy + player.speed / 2 + player.engagement * 10).toFixed(0)}
+                  </div>
+                  <div className="text-gray-400">Score</div>
+                </div>
+                <ChevronRight className="w-6 h-6 text-gray-500 ml-4" />
               </div>
-              <div className="w-20 text-center">
-                <div className="font-bold">{player.accuracy}%</div>
-                <div className="text-gray-400">Accuracy</div>
-              </div>
-              <div className="w-20 text-center">
-                <div className="font-bold">{player.engagement}</div>
-                <div className="text-gray-400">Engage</div>
-              </div>
-            </div>
-            <div className="w-20 text-center ml-8">
-              <div className={`font-bold text-lg ${index < 3 ? 'text-yellow-400' : 'text-white'}`}>
-                {(player.accuracy + player.speed / 2 + player.engagement * 10).toFixed(0)}
-              </div>
-              <div className="text-gray-400">Score</div>
-            </div>
-            <ChevronRight className="w-6 h-6 text-gray-500 ml-4" />
-          </div>
-        ))}
+            )
+          })}
+        </div>
+        <div className="flex justify-between items-center p-4 bg-gray-750">
+          <button
+            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+            disabled={currentPage === 1}
+            className="flex items-center px-4 py-2 bg-gray-700 rounded-md disabled:opacity-50"
+          >
+            <ChevronLeft className="w-4 h-4 mr-2" />
+            Previous
+          </button>
+          <span>Page {currentPage} of {totalPages}</span>
+          <button
+            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+            disabled={currentPage === totalPages}
+            className="flex items-center px-4 py-2 bg-gray-700 rounded-md disabled:opacity-50"
+          >
+            Next
+            <ChevronRight className="w-4 h-4 ml-2" />
+          </button>
+        </div>
       </div>
     </div>
   )
