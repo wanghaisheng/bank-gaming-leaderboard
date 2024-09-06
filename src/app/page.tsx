@@ -58,22 +58,24 @@ export default function Home() {
   const [searchTerm, setSearchTerm] = useState('')
   const playersPerPage = 10
 
-  const filteredAndSortedData = useMemo(() => {
-    return [...mockData]
-      .filter(player => 
-        player.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        player.department.toLowerCase().includes(searchTerm.toLowerCase())
-      )
-      .sort((a, b) => {
-        if (b.accuracy !== a.accuracy) return b.accuracy - a.accuracy
-        if (a.speed !== b.speed) return a.speed - b.speed
-        return b.engagement - a.engagement
-      })
-  }, [searchTerm])
+  const sortedData = useMemo(() => {
+    return [...mockData].sort((a, b) => {
+      if (b.accuracy !== a.accuracy) return b.accuracy - a.accuracy
+      if (a.speed !== b.speed) return a.speed - b.speed
+      return b.engagement - a.engagement
+    })
+  }, [])
 
-  const totalPages = Math.ceil(filteredAndSortedData.length / playersPerPage)
+  const filteredData = useMemo(() => {
+    return sortedData.filter(player => 
+      player.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      player.department.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+  }, [sortedData, searchTerm])
 
-  const currentPlayers = filteredAndSortedData.slice(
+  const totalPages = Math.ceil(filteredData.length / playersPerPage)
+
+  const currentPlayers = filteredData.slice(
     (currentPage - 1) * playersPerPage,
     currentPage * playersPerPage
   )
@@ -129,7 +131,7 @@ export default function Home() {
       <div className="flex-grow bg-gray-800 rounded-lg overflow-hidden flex flex-col">
         <div className="flex-grow overflow-auto">
           {currentPlayers.map((player, index) => {
-            const actualIndex = filteredAndSortedData.indexOf(player)
+            const actualIndex = sortedData.indexOf(player)
             const isTopThree = actualIndex < 3
             return (
               <div key={index} className={`flex items-center p-4 ${index % 2 === 0 ? 'bg-gray-750' : 'bg-gray-800'} hover:bg-gray-700 transition-colors`}>
