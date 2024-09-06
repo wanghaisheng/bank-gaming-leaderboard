@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo } from 'react'
 import Image from 'next/image'
-import { ArrowUp, ArrowDown, Minus, ChevronRight, ChevronLeft, Trophy, Search } from 'lucide-react'
+import { ArrowUp, ArrowDown, Minus, ChevronRight, ChevronLeft, Trophy, Search, Clock } from 'lucide-react'
 import mashreqLogo from './mashreq-logo.png'
 import { Cairo } from 'next/font/google'
 
@@ -78,10 +78,33 @@ export default function Home() {
     currentPage * playersPerPage
   )
 
+  const { daysLeft, startDate, endDate } = useMemo(() => {
+    const start = new Date('2024-09-30')
+    const end = new Date('2024-12-15')
+    const today = new Date('2024-10-12') // Pretending today is October 12
+    const timeDiff = end.getTime() - today.getTime()
+    const daysRemaining = Math.ceil(timeDiff / (1000 * 3600 * 24))
+    
+    return {
+      daysLeft: daysRemaining,
+      startDate: start.toLocaleDateString('en-US', { month: 'long', day: 'numeric' }),
+      endDate: end.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })
+    }
+  }, [])
+
   return (
     <div className={`h-screen bg-gray-900 text-white p-8 flex flex-col ${cairo.className}`}>
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Mashreq Culture Leaderboard</h1>
+        <div>
+          <h1 className="text-3xl font-bold mb-2">Mashreq Culture Leaderboard</h1>
+          <div className="flex items-center text-sm text-gray-400">
+            <span>{startDate} - {endDate}</span>
+            <div className="flex items-center ml-4 bg-gray-800 px-3 py-1 rounded-md">
+              <Clock className="w-4 h-4 mr-2 text-blue-400" />
+              <span className="font-semibold">{daysLeft} days left</span>
+            </div>
+          </div>
+        </div>
         <Image
           src={mashreqLogo}
           alt="Mashreq Bank Logo"
