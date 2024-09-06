@@ -4,6 +4,9 @@ import React, { useState } from 'react'
 import Image from 'next/image'
 import { ArrowUp, ArrowDown, Minus, ChevronRight, ChevronLeft } from 'lucide-react'
 import mashreqLogo from './mashreq-logo.png'
+import { Cairo } from 'next/font/google'
+
+const cairo = Cairo({ subsets: ['latin'] })
 
 type Player = {
   name: string
@@ -67,7 +70,7 @@ export default function Home() {
   )
 
   return (
-    <div className="h-screen bg-gray-900 text-white p-8 flex flex-col">
+    <div className={`h-screen bg-gray-900 text-white p-8 flex flex-col ${cairo.className}`}>
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Mashreq Culture Leaderboard</h1>
         <Image
