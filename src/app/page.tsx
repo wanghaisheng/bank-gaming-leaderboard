@@ -110,7 +110,7 @@ export default function Home() {
         <Image
           src={mashreqLogo}
           alt="Mashreq Bank Logo"
-          width={120}
+          width={300}
           height={40}
           className="object-contain"
         />
